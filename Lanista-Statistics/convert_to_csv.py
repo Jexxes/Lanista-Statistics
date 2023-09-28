@@ -1,79 +1,98 @@
 import csv
 import json
 
+# Column mapping dictionary for renaming
+COLUMN_MAPPING = {
+    'level': 'Grad',
+    'stats_changed': 'Utsatta poäng',
+    'STAMINA': 'Bashälsa',
+    'STRENGTH': 'Styrka',
+    'WISDOM': 'Intellekt',
+    'ENDURANCE': 'Uthållighet',
+    'INITIATIVE': 'Initiativ',
+    'LEARNING_CAPACITY': 'Inlärningsförmåga',
+    'DODGE': 'Undvika anfall',
+    'LUCK': 'Tur',
+    'DISCIPLINE': 'Disciplin',
+    'LEADERSHIP': 'Ledarskap',
+    'AXE': 'Yxa',
+    'SWORD': 'Svärd',
+    'MACE': 'Hammare',
+    'STAVE': 'Stav',
+    'SHIELD': 'Sköld',
+    'SPEAR': 'Stickvapen',
+    'CHAIN': 'Kättingvapen',
+    'FIST_WEAPON': 'Obeväpnat'
+}
 
-# Function to convert JSON to CSV with further enhancements
-def json_to_csv(json_data, csv_file_path):
-    # Sort the JSON data by 'level' in ascending order
-    sorted_json_data = sorted(json_data, key=lambda x: x['level'])
+class JsonToCsvConverter:
+    def __init__(self, json_data):
+        self.json_data = sorted(json_data, key=lambda x: x['level'])
+        self.csv_data = []
+        self.prev_stats_values = {}
+        self.prev_weapon_skills_values = {}
+        self.generate_header()
 
-    # Create a list to hold the header and data rows
-    csv_data = []
+    def generate_header(self):
+        header = ['level', 'stats_changed']  # Removed unnecessary columns
+        first_entry = self.json_data[0]
+        stats_names = [stat['name'] for stat in first_entry['stats']['stats']]
+        weapon_skills_names = [skill['name'] for skill in first_entry['stats']['weapon_skills']]
+        header.extend(stats_names)
+        header.extend(weapon_skills_names)
 
-    # Extract header
-    header = ['id', 'level', 'paragon_level', 'created_at', 'stats_changed']
+        # Translate header to Swedish
+        header = [COLUMN_MAPPING.get(col, col) for col in header]
+        self.csv_data.append(header)
 
-    # Dynamically find the stats and weapon_skills names for header
-    first_entry = sorted_json_data[0]
-    stats_names = [stat['name'] for stat in first_entry['stats']['stats']]
-    weapon_skills_names = [skill['name'] for skill in first_entry['stats']['weapon_skills']]
-
-    # Combine to create full header
-    header.extend(stats_names)
-    header.extend(weapon_skills_names)
-
-    # Add header to csv_data
-    csv_data.append(header)
-
-    # Variable to hold the previous level's stats and weapon_skills for comparison
-    prev_stats_values = {}
-    prev_weapon_skills_values = {}
-
-    # Loop through each level's data
-    for entry in sorted_json_data:
-        row = [entry['id'], entry['level'], entry['paragon_level'], entry['created_at']]
-
-        # Extract stats and weapon_skills
+    def extract_and_compare_stats(self, entry, stats_names, weapon_skills_names):
         stats_values = {stat['name']: stat['value'] for stat in entry['stats']['stats']}
         weapon_skills_values = {skill['name']: skill['value'] for skill in entry['stats']['weapon_skills']}
-
-        # Detect stats that have changed compared to the previous level and calculate the change amount
         changed_stats = []
-        for name in stats_names:
-            if name in prev_stats_values:
-                change = stats_values.get(name, 0) - prev_stats_values[name]
-                if change != 0:
-                    changed_stats.append(f"{name} ({change})")
+
+        self.stat_changes(changed_stats, stats_names, stats_values)
+
+        self.weapon_skill_changes(changed_stats, weapon_skills_names, weapon_skills_values)
+
+        self.prev_stats_values = stats_values
+        self.prev_weapon_skills_values = weapon_skills_values
+
+        return ", ".join(changed_stats) if changed_stats else 'N/A', stats_values, weapon_skills_values
+
+    def weapon_skill_changes(self, changed_stats, weapon_skills_names, weapon_skills_values):
         for name in weapon_skills_names:
-            if name in prev_weapon_skills_values:
-                change = weapon_skills_values.get(name, 0) - prev_weapon_skills_values[name]
+            if name in self.prev_weapon_skills_values:
+                change = weapon_skills_values.get(name, 0) - self.prev_weapon_skills_values[name]
                 if change != 0:
-                    changed_stats.append(f"{name} ({change})")
+                    # Translate name to Swedish
+                    translated_name = COLUMN_MAPPING.get(name, name)
+                    changed_stats.append(f"{translated_name} ({change})")
 
-        # Add the changed stats and their change amounts to the row
-        row.append(", ".join(changed_stats) if changed_stats else 'N/A')
+    def stat_changes(self, changed_stats, stats_names, stats_values):
+        for name in stats_names:
+            if name in self.prev_stats_values:
+                change = stats_values.get(name, 0) - self.prev_stats_values[name]
+                if change != 0:
+                    translated_name = COLUMN_MAPPING.get(name, name)
+                    changed_stats.append(f"{translated_name} ({change})")
 
-        # Fill in the stats and weapon_skills values in the same order as in header
-        row.extend([stats_values.get(name, 'N/A') for name in stats_names])
-        row.extend([weapon_skills_values.get(name, 'N/A') for name in weapon_skills_names])
+    def convert(self, csv_file_path):
+        for entry in self.json_data:
+            row = [entry['level']]
+            stats_names = [stat['name'] for stat in entry['stats']['stats']]
+            weapon_skills_names = [skill['name'] for skill in entry['stats']['weapon_skills']]
+            changed_stats, stats_values, weapon_skills_values = self.extract_and_compare_stats(entry, stats_names,
+                                                                                               weapon_skills_names)
+            row.append(changed_stats)
+            row.extend([stats_values.get(name, 'N/A') for name in stats_names])
+            row.extend([weapon_skills_values.get(name, 'N/A') for name in weapon_skills_names])
+            self.csv_data.append(row)
 
-        # Add the row to csv_data
-        csv_data.append(row)
+        with open(csv_file_path, 'w', newline='') as csvfile:
+            csvwriter = csv.writer(csvfile)
+            csvwriter.writerows(self.csv_data)
 
-        # Update the previous level's stats and weapon_skills for the next iteration
-        prev_stats_values = stats_values
-        prev_weapon_skills_values = weapon_skills_values
+def json_to_csv(json_data, csv_file_path):
+    converter = JsonToCsvConverter(json_data)
+    converter.convert(csv_file_path)
 
-    # Write the csv_data to a CSV file
-    with open(csv_file_path, 'w', newline='') as csvfile:
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerows(csv_data)
-
-# # Load the JSON file into a Python object
-# json_file_path = 'Lanista_leveling_data.json'
-# with open(json_file_path, 'r') as f:
-#     json_data = json.load(f)
-#
-# # Convert the JSON data to CSV
-# csv_file_path = 'Lanista_leveling_data.csv'
-# json_to_csv(json_data, csv_file_path)
