@@ -1,0 +1,21 @@
+Grad,Utsatta poäng,Bashälsa,Styrka,Intellekt,Uthållighet,Initiativ,Inlärningsförmåga,Undvika anfall,Tur,Disciplin,Ledarskap,TAUNT,Yxa,Svärd,Hammare,Stav,Sköld,Stickvapen,Kättingvapen,Obeväpnat
+1,N/A; N/A,25,40,0,25,20,0,0,0,0,0,0,0,0,0,0,0,0,40,0
+2,N/A; N/A,25,40,0,25,20,0,0,0,0,0,0,0,0,0,0,0,0,40,0
+3,"Styrka (5), Initiativ (5); Kättingvapen (10)",25,45,0,25,25,0,0,0,0,0,0,0,0,0,0,0,0,50,0
+4,Styrka (10); Kättingvapen (10),25,55,0,25,25,0,0,0,0,0,0,0,0,0,0,0,0,60,0
+5,"Bashälsa (10), Styrka (4), Initiativ (6); N/A",35,59,0,25,31,0,0,0,0,0,0,0,0,0,0,0,0,60,0
+6,"Bashälsa (5), Styrka (10); Kättingvapen (5)",40,69,0,25,31,0,0,0,0,0,0,0,0,0,0,0,0,65,0
+7,"Bashälsa (8), Styrka (5), Initiativ (2); Kättingvapen (5)",48,74,0,25,33,0,0,0,0,0,0,0,0,0,0,0,0,70,0
+8,"Bashälsa (10), Styrka (5); Kättingvapen (5)",58,79,0,25,33,0,0,0,0,0,0,0,0,0,0,0,0,75,0
+9,"Bashälsa (5), Styrka (5), Initiativ (3); Kättingvapen (7)",63,84,0,25,36,0,0,0,0,0,0,0,0,0,0,0,0,82,0
+10,"Bashälsa (15), Styrka (2), Uthållighet (3); N/A",78,86,0,28,36,0,0,0,0,0,0,0,0,0,0,0,0,82,0
+11,"Bashälsa (2), Styrka (10), Initiativ (3); Kättingvapen (5)",80,96,0,28,39,0,0,0,0,0,0,0,0,0,0,0,0,87,0
+12,"Bashälsa (10), Styrka (5); Kättingvapen (5)",90,101,0,28,39,0,0,0,0,0,0,0,0,0,0,0,0,92,0
+13,"Bashälsa (7), Styrka (4), Uthållighet (-3), Initiativ (4); Kättingvapen (8)",97,105,0,0,0,0,0,0,0,25,43,0,0,0,0,0,0,100,0
+14,"Styrka (15), Initiativ (5); N/A",97,120,0,0,0,0,0,0,0,25,48,0,0,0,0,0,0,100,0
+15,"Bashälsa (7), Styrka (5), Initiativ (5); Kättingvapen (3)",104,125,0,0,0,0,0,0,0,25,53,0,0,0,0,0,0,103,0
+16,"Bashälsa (3), Styrka (5), Initiativ (2); Kättingvapen (10)",107,130,0,0,0,0,0,0,0,25,55,0,0,0,0,0,0,113,0
+17,"Bashälsa (10), Styrka (5); Kättingvapen (5)",117,135,0,0,0,0,0,0,0,25,55,0,0,0,0,0,0,118,0
+18,"Bashälsa (7), Styrka (5), Initiativ (3); Kättingvapen (5)",124,140,0,0,0,0,0,0,0,25,58,0,0,0,0,0,0,123,0
+19,"Bashälsa (12), Styrka (5); Kättingvapen (3)",136,145,0,0,0,0,0,0,0,25,58,0,0,0,0,0,0,126,0
+20,"Bashälsa (5), Styrka (9), Initiativ (6); N/A",141,154,0,0,0,0,0,0,0,25,64,0,0,0,0,0,0,126,0

@@ -1,7 +1,13 @@
 import csv
 import json
 
-# Column mapping dictionary for renaming
+# Author Maximilian Ygdell (2023-09-29)
+
+# This code is a bit messy at the moment. Late night work.
+# I may refactor it at a later point, but it should at least work
+# for the basic cases
+
+# Words to translate from English to Swedish
 COLUMN_MAPPING = {
     'level': 'Grad',
     'stats_changed': 'Utsatta poäng',
@@ -33,66 +39,54 @@ class JsonToCsvConverter:
         self.prev_weapon_skills_values = {}
         self.generate_header()
 
+    # Get headers from json response and translates it to Swedish
     def generate_header(self):
-        header = ['level', 'stats_changed']  # Removed unnecessary columns
         first_entry = self.json_data[0]
         stats_names = [stat['name'] for stat in first_entry['stats']['stats']]
         weapon_skills_names = [skill['name'] for skill in first_entry['stats']['weapon_skills']]
-        header.extend(stats_names)
-        header.extend(weapon_skills_names)
+        header = ['level', 'stats_changed'] + stats_names + weapon_skills_names
+        self.csv_data.append([COLUMN_MAPPING.get(col, col) for col in header])
 
-        # Translate header to Swedish
-        header = [COLUMN_MAPPING.get(col, col) for col in header]
-        self.csv_data.append(header)
-
-    def extract_and_compare_stats(self, entry, stats_names, weapon_skills_names):
-        stats_values = {stat['name']: stat['value'] for stat in entry['stats']['stats']}
-        weapon_skills_values = {skill['name']: skill['value'] for skill in entry['stats']['weapon_skills']}
-        changed_stats = []
-
-        self.stat_changes(changed_stats, stats_names, stats_values)
-
-        self.weapon_skill_changes(changed_stats, weapon_skills_names, weapon_skills_values)
-
-        self.prev_stats_values = stats_values
-        self.prev_weapon_skills_values = weapon_skills_values
-
-        return ", ".join(changed_stats) if changed_stats else 'N/A', stats_values, weapon_skills_values
-
-    def weapon_skill_changes(self, changed_stats, weapon_skills_names, weapon_skills_values):
-        for name in weapon_skills_names:
-            if name in self.prev_weapon_skills_values:
-                change = weapon_skills_values.get(name, 0) - self.prev_weapon_skills_values[name]
-                if change != 0:
-                    # Translate name to Swedish
-                    translated_name = COLUMN_MAPPING.get(name, name)
-                    changed_stats.append(f"{translated_name} ({change})")
-
-    def stat_changes(self, changed_stats, stats_names, stats_values):
-        for name in stats_names:
-            if name in self.prev_stats_values:
-                change = stats_values.get(name, 0) - self.prev_stats_values[name]
+     # Checks what stats are changed from previous levels
+    def extract_and_compare(self, entry, names, prev_values, category):
+        current_values = {item['name']: item['value'] for item in entry['stats'][category]}
+        changed = []
+        for name in names:
+            if name in prev_values:
+                change = current_values.get(name, 0) - prev_values[name]
                 if change != 0:
                     translated_name = COLUMN_MAPPING.get(name, name)
-                    changed_stats.append(f"{translated_name} ({change})")
+                    changed.append(f"{translated_name} ({change})")
+        prev_values.update(current_values)
+        return ", ".join(changed) if changed else 'N/A', current_values
 
-    def convert(self, csv_file_path):
-        for entry in self.json_data:
-            row = [entry['level']]
-            stats_names = [stat['name'] for stat in entry['stats']['stats']]
-            weapon_skills_names = [skill['name'] for skill in entry['stats']['weapon_skills']]
-            changed_stats, stats_values, weapon_skills_values = self.extract_and_compare_stats(entry, stats_names,
-                                                                                               weapon_skills_names)
-            row.append(changed_stats)
-            row.extend([stats_values.get(name, 'N/A') for name in stats_names])
-            row.extend([weapon_skills_values.get(name, 'N/A') for name in weapon_skills_names])
-            self.csv_data.append(row)
-
+    
+    def write_to_file(self, csv_file_path):
         with open(csv_file_path, 'w', newline='') as csvfile:
             csvwriter = csv.writer(csvfile)
             csvwriter.writerows(self.csv_data)
 
+    def convert(self, csv_file_path):
+        for entry in self.json_data:
+            stats_names = [stat['name'] for stat in entry['stats']['stats']]
+            weapon_skills_names = [skill['name'] for skill in entry['stats']['weapon_skills']]
+            
+            row = [entry['level']]
+            changed_stats, _ = self.extract_and_compare(entry, stats_names, self.prev_stats_values, 'stats')
+            changed_skills, _ = self.extract_and_compare(entry, weapon_skills_names, self.prev_weapon_skills_values, 'weapon_skills')
+            
+            all_changes = changed_stats + "; " + changed_skills if changed_stats and changed_skills else changed_stats or changed_skills
+            row.append(all_changes)
+
+            row.extend([self.prev_stats_values.get(name, 'N/A') for name in stats_names])
+            row.extend([self.prev_weapon_skills_values.get(name, 'N/A') for name in weapon_skills_names])
+            
+            self.csv_data.append(row)
+        
+        self.write_to_file(csv_file_path)
+
 def json_to_csv(json_data, csv_file_path):
     converter = JsonToCsvConverter(json_data)
     converter.convert(csv_file_path)
+
 
