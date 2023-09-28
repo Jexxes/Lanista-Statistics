@@ -2,7 +2,9 @@
 
 ## Description
 
-A Python program that provides an easy-to-use interface to fetch and analyze statistics from the game [Lanista](https://beta.lanista.se). Utilizes a simple GUI to input login credentials and fetch data. Data can be exported in either JSON or CSV format. Permission was given to create this program by Lanista Developers, but it is by all means unofficial. 
+A Python program that provides an easy-to-use interface to fetch and analyze statistics from the game [Lanista](https://beta.lanista.se). Utilizes a simple GUI to input login credentials and fetch data. The program will gather information about what stat points were placed into which statistic when increasing your "Grad" (level) and give you grade by grade overview. Data can be exported in either JSON or CSV format. Permission was given to create this program by Lanista Developers, but it is by all means unofficial. 
+
+Example of csv output can be found here: [Lanista-Statistics-Example-CSV](https://docs.google.com/spreadsheets/d/1mdavIbndFyGw0294GwJUKw97IAgoVKZkpwG_yXGs4J4/edit?usp=sharing) 
 
 ![Lanista-Statistics-GUI](https://cdn.discordapp.com/attachments/1068228784584654988/1157081561162850395/Lanista_Glad_Info_v02.png?ex=65174fad&is=6515fe2d&hm=b1b1b2e6b3d80d1f4304df8b08749c09a4b97f8faf0d9a6d90698b477bb1d8f4)
 
