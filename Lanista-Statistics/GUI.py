@@ -31,8 +31,20 @@ class LanistaDataFetcher:
         self.password_entry = ttk.Entry(self.root, show="*")
         self.password_entry.grid(row=1, column=1, padx=2, pady=10)
 
+        self.fetch_data_button = ttk.Button(self.root, text="Hämta Gradinfo", command=self.fetch_data)
+        self.fetch_data_button.grid(row=3, columnspan=2, padx=10, pady=10)
+
+        self.export_csv_button = ttk.Button(self.root, text="Exportera till CSV", command=self.export_to_csv, state=tk.DISABLED)
+        self.export_csv_button.grid(row=4, columnspan=2, padx=10, pady=10)
+
+        self.export_json_button = ttk.Button(self.root, text="Exportera JSON", command=self.export_to_json, state=tk.DISABLED)
+        self.export_json_button.grid(row=5, columnspan=2, padx=10, pady=10)
+
+        self.status_text = tk.Text(self.root, height=5, width=40)
+        self.status_text.grid(row=6, columnspan=2, padx=10, pady=10)
+
         self.gladiator_frame = ttk.Frame(self.root)
-        self.gladiator_frame.grid(row=6, columnspan=3, padx=10, pady=10)
+        self.gladiator_frame.grid(row=7, columnspan=3, padx=10, pady=10)
 
         self.gladiator_stats_label = ttk.Label(self.gladiator_frame, text="Basinfo Gladiator:")
         self.gladiator_stats_label.grid(row=0, column=1, padx=2, pady=2)
@@ -51,15 +63,6 @@ class LanistaDataFetcher:
         self.gladiator_race_label.grid(row=3, column=0, padx=2, pady=2)
         self.gladiator_race_value = ttk.Label(self.gladiator_frame, text="")
         self.gladiator_race_value.grid(row=3, column=2, padx=2, pady=2)
-
-        self.fetch_data_button = ttk.Button(self.root, text="Hämta Gradinfo", command=self.fetch_data)
-        self.fetch_data_button.grid(row=3, columnspan=2, padx=10, pady=10)
-
-        self.export_csv_button = ttk.Button(self.root, text="Exportera till CSV", command=self.export_to_csv, state=tk.DISABLED)
-        self.export_csv_button.grid(row=4, columnspan=2, padx=10, pady=10)
-
-        self.status_text = tk.Text(self.root, height=5, width=40)
-        self.status_text.grid(row=5, columnspan=2, padx=10, pady=10)
 
 
 
@@ -91,6 +94,7 @@ class LanistaDataFetcher:
         if self.fetched_data is not None:
             self.append_status("Data inhämtad")
             self.export_csv_button['state'] = tk.NORMAL
+            self.export_json_button['state'] = tk.NORMAL
             self.gladiator_info = scraper.get_gladiator_info()
             avatar_details = self.extract_gladiator_details(self.gladiator_info)
 
@@ -103,12 +107,22 @@ class LanistaDataFetcher:
         else:
             self.append_status("Felaktig e-post eller lösenord!")
 
+    # Will change this to work with both file types 
     def export_to_csv(self):
         if self.fetched_data:
             json_to_csv(self.fetched_data, "Lanista_leveling_data.csv")
             self.append_status("Exporterat till CSV!")
         else:
             self.append_status("Ingen gradinfo funnen, hämta data igen.")
+
+    def export_to_json(self):
+        if self.fetched_data:
+            with open("Lanista_leveling_data.json", 'w') as json_file:
+                json_file.write(json.dumps(self.fetched_data, indent=4))
+            self.append_status("Exporterat till JSON!")
+        else:
+            self.append_status("Ingen data funnen, hämta data igen.")
+            
 
     def run(self):
         self.root.mainloop()
