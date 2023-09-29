@@ -17,6 +17,7 @@ class LanistaDataFetcher:
         self.create_widgets()
         self.fetched_data = None
         self.gladiator_info = None
+        self.gladiator_id = None
 
 
     # Setup GUI elements
@@ -83,15 +84,17 @@ class LanistaDataFetcher:
     def fetch_data(self):
         email = self.email_entry.get()
         password = self.password_entry.get()
+        self.append_status("Loggar in...")
         scraper = LanistaScraper()
-        api_url = "https://beta.lanista.se/api/avatars/3255/levelhistory"
         scraper.login(email, password)
+        self.gladiator_info = scraper.get_gladiator_info()
+        self.gladiator_id = self.gladiator_info.get('avatars',None)[0].get('id', None)
+        api_url = f"https://beta.lanista.se/api/avatars/{self.gladiator_id}/levelhistory"
         self.fetched_data = scraper.fetch_data(api_url)
 
         if self.fetched_data is not None:
             self.append_status("Data inhämtad")
             self.export_csv_button['state'] = tk.NORMAL
-            self.gladiator_info = scraper.get_gladiator_info()
             avatar_details = self.extract_gladiator_details(self.gladiator_info)
 
             if avatar_details:
@@ -100,12 +103,13 @@ class LanistaDataFetcher:
                 self.gladiator_race_value['text'] = avatar_details['race'].replace('|', ', ').capitalize()
             else:
                 self.append_status("Ingen gladiatorinfo hittad! ")
+
         else:
             self.append_status("Felaktig e-post eller lösenord!")
 
     def export_to_csv(self):
         if self.fetched_data:
-            json_to_csv(self.fetched_data, "Lanista_leveling_data.csv")
+            json_to_csv(self.fetched_data, f"{self.gladiator_name_value['text']}_leveling_data.csv")
             self.append_status("Exporterat till CSV!")
         else:
             self.append_status("Ingen gradinfo funnen, hämta data igen.")
